@@ -32,7 +32,8 @@
 ##############################################################################
 # Application target name
 
-TARGET ?= AN1193_Blinky
+#TARGET ?= AN1193_Blinky
+TARGET ?= Encoder
 
 ##############################################################################
 #User definable make parameters that may be overwritten from the command line
@@ -79,6 +80,8 @@ APP_SRC_DIR         = $(APP_BASE)/Source
 
 # Note: Path to source file is found using vpath below, so only .c filename is required
 APPSRC += $(TARGET).c
+#APPSRC += twi_drv.c
+#APPSRC += sht31.c
 
 ##############################################################################
 # Additional Application Source directories
