@@ -76,13 +76,13 @@ PUBLIC void AppColdStart(void)
      * turn all LED's off */
 
     /* Initiate Timer mode Counter */
-	vAHI_TimerEnable(E_AHI_TIMER_0, 8, TRUE, FALSE, FALSE);
+	vAHI_TimerEnable(E_AHI_TIMER_0, 8, TRUE, TRUE, FALSE);
 	vAHI_TimerClockSelect(E_AHI_TIMER_0, TRUE, FALSE);
 	vAHI_Timer0RegisterCallback(vTimer0ISR);
 	vAHI_TimerConfigureInputs(E_AHI_TIMER_0, FALSE, FALSE);
 
 	/* Start timer encoder */
-	vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 10000, 10000);
+	vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 10, 10);
 
 	static uint16_t u16Encoder = 0;
 
@@ -119,7 +119,19 @@ PUBLIC void AppWarmStart(void)
 /***        Local Functions                                               ***/
 /****************************************************************************/
 PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap) {
+	DBG_vPrintf(TRUE, "Interrupt timer0\n");
+	/* restart timer */
+	vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 10, 10);
 
+	if (E_AHI_TIMER_RISE_MASK & u32ItemBitmap)
+	{
+		//TODO: handle interrupt over shot threshold
+		DBG_vPrintf(TRUE, "Interrupt rise timer\n");
+	}
+	else if (E_AHI_TIMER_PERIOD_MASK & u32ItemBitmap)
+	{
+		DBG_vPrintf(TRUE, "Interrupt period timer\n");
+	}
 }
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
