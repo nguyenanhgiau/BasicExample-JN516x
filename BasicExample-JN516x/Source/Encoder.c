@@ -76,7 +76,7 @@ PUBLIC void AppColdStart(void)
      * turn all LED's off */
 
     /* Initiate Timer mode Counter */
-	vAHI_TimerEnable(E_AHI_TIMER_0, 8, TRUE, TRUE, FALSE);
+	vAHI_TimerEnable(E_AHI_TIMER_0, 0, TRUE, TRUE, FALSE);
 	vAHI_TimerClockSelect(E_AHI_TIMER_0, TRUE, FALSE);
 	vAHI_Timer0RegisterCallback(vTimer0ISR);
 	vAHI_TimerConfigureInputs(E_AHI_TIMER_0, FALSE, FALSE);
