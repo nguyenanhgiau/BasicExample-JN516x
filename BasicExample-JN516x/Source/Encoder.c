@@ -95,6 +95,12 @@ PUBLIC void AppColdStart(void)
 	/* set duty cycle 100/255 */
 	vAHI_TimerStartRepeat(E_AHI_TIMER_1, 100, 255);
 
+	/* Initialize adc */
+	vAHI_ApConfigure(E_AHI_AP_REGULATOR_ENABLE,E_AHI_AP_INT_DISABLE,E_AHI_AP_SAMPLE_2,E_AHI_AP_CLOCKDIV_500KHZ,E_AHI_AP_INTREF);
+	vAHI_AdcEnable(E_AHI_ADC_CONTINUOUS,E_AHI_AP_INPUT_RANGE_1,E_AHI_ADC_SRC_ADC_1);
+	vAHI_AdcStartAccumulateSamples(E_AHI_ADC_ACC_SAMPLE_16);
+	vAHI_AdcStartSample();
+
 	static uint16_t u16Encoder = 0;
 
     /* Main loop, just flashes LED's */
@@ -105,6 +111,7 @@ PUBLIC void AppColdStart(void)
     	{
     		u16Encoder = u16AHI_TimerReadCount(E_AHI_TIMER_0);
     		DBG_vPrintf(TRUE, "New value: %d\n", u16Encoder);
+    		DBG_vPrintf(TRUE, "ADC value: %d\n", u16AHI_AdcRead());
     	}
     }
 }
