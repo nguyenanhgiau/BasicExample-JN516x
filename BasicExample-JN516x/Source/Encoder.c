@@ -18,7 +18,8 @@
 /****************************************************************************/
 /***        Macro Definitions                                             ***/
 /****************************************************************************/
-
+#define MOTOR_DIR_DIO			(12)
+#define MOTOR_DIR_DIO_MASK		(1UL << MOTOR_DIR_DIO)
 /****************************************************************************/
 /***        Type Definitions                                              ***/
 /****************************************************************************/
@@ -72,17 +73,27 @@ PUBLIC void AppColdStart(void)
 	DBG_vPrintf(TRUE, "* SMART-CURTAIN RESET                         *\n");
 	DBG_vPrintf(TRUE, "***********************************************\n");
 
-    /* Initialize DIO's used to control LEDs on DR1199 expansion board and
-     * turn all LED's off */
-
-    /* Initiate Timer mode Counter */
+	/* Initiate Timer mode Counter */
 	vAHI_TimerEnable(E_AHI_TIMER_0, 0, TRUE, TRUE, FALSE);
 	vAHI_TimerClockSelect(E_AHI_TIMER_0, TRUE, FALSE);
 	vAHI_Timer0RegisterCallback(vTimer0ISR);
 	vAHI_TimerConfigureInputs(E_AHI_TIMER_0, FALSE, FALSE);
 
 	/* Start timer encoder */
-	vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 10, 10);
+	vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 65000, 65000);
+
+
+	/* Initialize DIO's used to control LEDs on DR1199 expansion board and
+	 * turn all LED's off */
+	vAHI_DioSetDirection(0, MOTOR_DIR_DIO_MASK);
+	vAHI_DioSetOutput(MOTOR_DIR_DIO_MASK, 0);
+
+	/* Configure timer 1 to generate a PWM output on its output pin */
+	vAHI_TimerEnable(E_AHI_TIMER_1, 4, FALSE, FALSE, TRUE);
+	vAHI_TimerConfigureOutputs(E_AHI_TIMER_1, FALSE, TRUE);
+	vAHI_TimerClockSelect(E_AHI_TIMER_1, FALSE, TRUE);
+	/* set duty cycle 100/255 */
+	vAHI_TimerStartRepeat(E_AHI_TIMER_1, 100, 255);
 
 	static uint16_t u16Encoder = 0;
 
@@ -125,7 +136,7 @@ PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 
 	if (E_AHI_TIMER_RISE_MASK & u32ItemBitmap)
 	{
-		//TODO: handle interrupt over shot threshold
+		// handle interrupt over shot threshold
 		DBG_vPrintf(TRUE, "Interrupt rise timer\n");
 	}
 	else if (E_AHI_TIMER_PERIOD_MASK & u32ItemBitmap)
