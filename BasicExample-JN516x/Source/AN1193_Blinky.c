@@ -37,6 +37,9 @@
 #include <AppHardwareApi.h>
 #include "dbg.h"
 #include "dbg_uart.h"
+#include "AppHardwareApi_JN516x.h"
+#include "twi_drv.h"
+#include "sht31.h"
 
 
 /****************************************************************************/
@@ -60,7 +63,7 @@
 /****************************************************************************/
 /***        Local Function Prototypes                                     ***/
 /****************************************************************************/
-PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap);
+//PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap);
 
 /****************************************************************************/
 /***        Exported Variables                                            ***/
@@ -69,8 +72,8 @@ PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap);
 /****************************************************************************/
 /***        Local Variables                                               ***/
 /****************************************************************************/
-static bool bOn = FALSE;
-const uint16 DUTY_CYCLE = 100;
+//static bool bOn = FALSE;
+//const uint16 DUTY_CYCLE = 100;
 /****************************************************************************/
 /***        Exported Functions                                            ***/
 /****************************************************************************/
@@ -103,27 +106,61 @@ PUBLIC void AppColdStart(void)
 
     DBG_vUartInit(DBG_E_UART_0, DBG_E_UART_BAUD_RATE_115200);
 
+    DBG_vPrintf(TRUE,"\n");
+	DBG_vPrintf(TRUE, "***********************************************\n");
+	DBG_vPrintf(TRUE, "* SWITCH-LIGHT RESET                          *\n");
+	DBG_vPrintf(TRUE, "***********************************************\n");
+
     /* Initialize DIO's used to control LEDs on DR1199 expansion board and
      * turn all LED's off */
-    vAHI_DioSetDirection(0, PIN_MASK(RELAY_1_PIN));
+//    vAHI_DioSetDirection(0, PIN_MASK(RELAY_1_PIN));
+    vAHI_DioSetDirection(0, PIN_MASK(4));
+    vAHI_DioSetDirection(0, PIN_MASK(5));
+    vAHI_DioSetOutput(PIN_MASK(4), 0);
+    vAHI_DioSetOutput(PIN_MASK(5), 0);
 
-    vAHI_DioSetDirection(PIN_MASK(ZERROCROSSS_PIN), 0);
+//    vAHI_DioSetDirection(PIN_MASK(ZERROCROSSS_PIN), 0);
+//
+//    vTWIBusInit();
+//
+//    if (sht31_init())
+//    	DBG_vPrintf(TRUE, "Init SHT31 successful\n");
+//    else
+//    	DBG_vPrintf(TRUE, "Init SHT31 fail\n");
+//
+//
+//    float temp, humi;
+
 
     /* Initiate Timer*/
     // clock is 16MHz so the time period is 0.0625micro seconds
     // we are using pre-scaler value of 8 so it will divide the
     // clock by 2^8 = 256 hence multiplying the time period by 256
     // so the timer clock will be 0.0625 * 256 = 16 ,micro sec
-    vAHI_TimerEnable(E_AHI_TIMER_0, 8, FALSE, TRUE, FALSE);
-    vAHI_TimerClockSelect(E_AHI_TIMER_0, FALSE, FALSE);
-    // Registering the callback function
-    vAHI_Timer0RegisterCallback(vTimer0ISR);
-    // Starting the timer for single shot
-    vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 62);
+//    vAHI_TimerEnable(E_AHI_TIMER_0, 8, FALSE, TRUE, FALSE);
+//    vAHI_TimerClockSelect(E_AHI_TIMER_0, FALSE, FALSE);
+//    // Registering the callback function
+//    vAHI_Timer0RegisterCallback(vTimer0ISR);
+//    // Starting the timer for single shot
+//    vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 62);
 
     /* Main loop, just flashes LED's */
     while(1)
     {
+    	vAHI_DioSetOutput(PIN_MASK(4), 0);
+		vAHI_DioSetOutput(PIN_MASK(5), 0);
+    	sht31_delay_ms(1000);
+    	vAHI_DioSetOutput(0, PIN_MASK(4));
+		vAHI_DioSetOutput(0, PIN_MASK(5));
+		sht31_delay_ms(1000);
+//    	if (sht31_read_value(&temp, &humi)) {
+//    		DBG_vPrintf(TRUE, "========================================\n");
+//			DBG_vPrintf(TRUE, "Temperature: %d.%d\n", (uint16)temp, ((uint16)(temp*100))%100);
+//			DBG_vPrintf(TRUE, "Humidity: %d.%d\n", (uint16)humi, ((uint16)(humi*100))%100);
+//		}
+//		else {
+//			DBG_vPrintf(TRUE, "Checksum fail");
+//		}
     }
 }
 
@@ -147,17 +184,17 @@ PUBLIC void AppWarmStart(void)
 /****************************************************************************/
 /***        Local Functions                                               ***/
 /****************************************************************************/
-PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap) {
-     if (bOn) {
-    	 vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 563);
-    	 vAHI_DioSetOutput(PIN_MASK(RELAY_1_PIN), 0);
-     }
-     else {
-    	 vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 62);
-    	 vAHI_DioSetOutput(0, PIN_MASK(RELAY_1_PIN));
-     }
-     bOn = !bOn;
-}
+//PRIVATE void vTimer0ISR(uint32 u32DeviceId, uint32 u32ItemBitmap) {
+//     if (bOn) {
+//    	 vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 563);
+//    	 vAHI_DioSetOutput(PIN_MASK(RELAY_1_PIN), 0);
+//     }
+//     else {
+//    	 vAHI_TimerStartSingleShot(E_AHI_TIMER_0, 500, 62);
+//    	 vAHI_DioSetOutput(0, PIN_MASK(RELAY_1_PIN));
+//     }
+//     bOn = !bOn;
+//}
 
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
